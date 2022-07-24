@@ -1,0 +1,106 @@
+<html>
+  <head> </head>
+  <script>
+    // const QuestionAPI = "https://www.algoexpert.io/api/fe/questions";
+    // const SubmittionAPI = "https://www.algoexpert.io/api/fe/submissions";
+    const QuestionAPI = "./data.json";
+    const SubmissionAPI = "./submisions.json";
+
+    async function fetchQuestionsAndSubmissions() {
+      const [questionRes, submissionsRes] = await Promise.all([
+        fetch(QuestionAPI),
+        fetch(SubmissionAPI),
+      ]);
+      return Promise.all([questionRes.json(), submissionsRes.json()]);
+    }
+
+    // Return Promise Array data
+    // console.log("fetchQuestions => ", fetchQuestions());
+
+    // Get Question By Categories
+    const getQuestionByCategories = (questions) => {
+      const questionByCategory = {};
+      questions.forEach((question) => {
+        if (questionByCategory.hasOwnProperty(question.category)) {
+          questionByCategory[question.category].push(question);
+        } else {
+          questionByCategory[question.category] = [question];
+        }
+      });
+      return questionByCategory;
+    };
+
+    const getSubmissionsById = (submissions) => {
+        const submissionsById = {};
+        submissions.forEach((submission) => {
+            submissionsById[submission.questionId] = submission.status;
+        })
+        return submissionsById;
+    }
+
+    // Return getQuestionByCategories from aray object add to object
+    //console.log("getQuestionByCategories => ", getQuestionByCategories());
+
+    // Apend All HTML data
+    const createCategory = (category, questions, submissionById) => {
+      const categoryDiv = document.createElement("div");
+      categoryDiv.classList.add("category");
+    
+      let correctCount = 0;
+
+      questions.forEach((question) => {
+        const questionDiv = document.createElement("div");
+        questionDiv.classList.add("question");
+
+        const status = document.createElement("div");
+        status.classList.add("status");
+        const statusClass = submissionById[question.id]?.toLowerCase()?.replace('_', '-');
+        status.classList.add(statusClass ?? "unattempted");
+        questionDiv.append("status");
+
+        if(submissionById[question.id] === "CORRECT" ){
+            correctCount++;
+        }
+
+        const h3 = document.createElement("h3");
+        h3.textContent = question.name;
+        questionDiv.append(h3);
+        categoryDiv.append(questionDiv);
+      });
+      const h2 = document.createElement("h2");
+     
+      h2.textContent = `${category}-${correctCount}/${questions.length}`;
+      categoryDiv.prepend(h2); 
+      return categoryDiv;
+    };
+
+    // Fetch & appendQuestion
+    async function fetchAndAppendQuesitons() {
+      const [questions, submissions]  = await fetchQuestionsAndSubmissions ();
+      const questionByCategory = getQuestionByCategories(questions);
+      const submissionById = getSubmissionsById(submissions); 
+
+      const wrapper = document.getElementById("wrapper");
+      for (const [category, questions] of Object.entries(questionByCategory)) {
+        const categoryNew = createCategory(category, questions, submissionById);
+        wrapper.append(categoryNew);
+      }
+    }
+
+
+
+    fetchAndAppendQuesitons();
+  </script>
+  <body>
+    <div id="wrapper"></div>
+    <!-- <div class="category">
+            <h2>HTML</h2>
+            <div class="question">
+                <h3>Stop Watch</h3>
+            </div>
+            <div class="question">
+                <h3>tic Tok toe</h3>
+            </div>
+        </div> -->
+  </body>
+</html>

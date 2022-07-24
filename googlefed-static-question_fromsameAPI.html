@@ -1,0 +1,80 @@
+<html>
+  <head> </head>
+  <script>
+    // const QuestionAPI = "https://www.algoexpert.io/api/fe/questions";
+    const QuestionAPI = "./data.json";
+
+    async function fetchQuestions() {
+      const response = await fetch(QuestionAPI);
+      const questions = response.json();
+      return questions;
+    }
+
+    // Return Promise Array data
+    console.log("fetchQuestions => ", fetchQuestions());
+
+    // Get Question By Categories
+    const getQuestionByCategories = (questions) => {
+      const questionByCategory = {};
+      questions.forEach((question) => {
+        if (questionByCategory.hasOwnProperty(question.category)) {
+          questionByCategory[question.category].push(question);
+        } else {
+          questionByCategory[question.category] = [question];
+        }
+      });
+      return questionByCategory;
+    };
+
+    // Return getQuestionByCategories from aray object add to object
+    //console.log("getQuestionByCategories => ", getQuestionByCategories());
+
+    // Apend All HTML data
+    const createCategory = (category, questions) => {
+      const categoryDiv = document.createElement("div");
+      categoryDiv.classList.add("category");
+      const h2 = document.createElement("h2");
+      h2.textContent = category;
+      categoryDiv.append(h2);
+
+      questions.forEach((question) => {
+        const questionDiv = document.createElement("div");
+        questionDiv.classList.add("question");
+        const h3 = document.createElement("h3");
+        h3.textContent = question.name;
+        questionDiv.append(h3);
+        categoryDiv.append(questionDiv);
+      });
+
+      return categoryDiv;
+    };
+
+    // Fetch & appendQuestion
+    async function fetchAndAppendQuesitons() {
+      const questions = await fetchQuestions();
+      const questionByCategory = getQuestionByCategories(questions);
+
+      const wrapper = document.getElementById("wrapper");
+      for (const [category, questions] of Object.entries(questionByCategory)) {
+        const categoryNew = createCategory(category, questions);
+        wrapper.append(categoryNew);
+      }
+    }
+
+    fetchAndAppendQuesitons();
+  </script>
+  <body>
+      <div id="wrapper">
+
+      </div>
+    <!-- <div class="category">
+            <h2>HTML</h2>
+            <div class="question">
+                <h3>Stop Watch</h3>
+            </div>
+            <div class="question">
+                <h3>tic Tok toe</h3>
+            </div>
+        </div> -->
+  </body>
+</html>
